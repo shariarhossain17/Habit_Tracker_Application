@@ -1,5 +1,11 @@
 import useAuth from "@/authProvider/useAuth";
 import { fetchHabits } from "@/fetchData/fetcData";
+import {
+  client,
+  COLLECTION_ID,
+  DATABASE_ID,
+  RealtimeResponse,
+} from "@/lib/appwrite";
 import { Habit } from "@/types/habitTypes";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -12,16 +18,43 @@ export default function Index() {
   const [habits, setHabits] = useState<Habit[]>([]);
 
   useEffect(() => {
-    const loadHabits = async () => {
-      try {
-        const result = await fetchHabits(user);
-        setHabits(result?.documents);
-      } catch (error) {
-        console.error("Failed to fetch habits:", error);
-      }
+    const loadHabbit = async () => {
+      const result = await fetchHabits(user);
+      setHabits(result?.documents);
     };
+    if (user) {
+      const habitsChannel = `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`;
+      const habitsSubscription = client.subscribe(
+        habitsChannel,
+        (response: RealtimeResponse) => {
+          if (
+            response.events.includes(
+              "databases.*.collections.*.documents.*.create"
+            )
+          ) {
+            loadHabbit();
+          } else if (
+            response.events.includes(
+              "databases.*.collections.*.documents.*.update"
+            )
+          ) {
+            loadHabbit();
+          } else if (
+            response.events.includes(
+              "databases.*.collections.*.documents.*.delete"
+            )
+          ) {
+            loadHabbit();
+          }
+        }
+      );
 
-    loadHabits();
+      loadHabbit();
+
+      return () => {
+        habitsSubscription();
+      };
+    }
   }, [user]);
 
   const isHabitCompleted = (id: string) => {
