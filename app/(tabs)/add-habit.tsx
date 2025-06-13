@@ -1,8 +1,10 @@
 import useAuth from "@/authProvider/useAuth";
 import { FREQUENCIES, Frequency } from "@/constants/habitConstants";
+import { COLLECTION_ID, database, DATABASE_ID } from "@/lib/appwrite";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { ID } from "react-native-appwrite";
 import {
   Button,
   SegmentedButtons,
@@ -20,7 +22,29 @@ export default function AddHabitScreen() {
   const router = useRouter();
   const theme = useTheme();
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    if (!user) return;
+    try {
+      await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
+        user_id: user.$id,
+        title,
+        description,
+        frequency,
+        streak_count: 0,
+        last_completed: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      });
+
+      router.back();
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+        return;
+      }
+
+      setError("There was an error creating the habit");
+    }
+  };
 
   return (
     <View style={styles.container}>

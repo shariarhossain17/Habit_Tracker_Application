@@ -8,5 +8,5 @@ export const client = new Client()
 export const account = new Account(client);
 export const database = new Databases(client);
 
-export const DATABASE_ID = process.env.EXPO_PUBLIC_DB_ID;
-export const COLLECTION_ID = process.env.EXPO_PUBLIC_Habit_COLLECTION_ID;
+export const DATABASE_ID = process.env.EXPO_PUBLIC_DB_ID!;
+export const COLLECTION_ID = process.env.EXPO_PUBLIC_Habit_COLLECTION_ID!;
