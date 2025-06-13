@@ -8,6 +8,7 @@ export default function AuthScreen() {
       >
         <View>
           <Text>create account</Text>
+          <Text>create account</Text>
         </View>
       </KeyboardAvoidingView>
     </>
