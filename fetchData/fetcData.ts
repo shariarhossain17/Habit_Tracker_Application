@@ -11,3 +11,11 @@ export const fetchHabits = async (user: any) => {
     console.error(error);
   }
 };
+
+export const handleDeleteHabit = async (id: string) => {
+  try {
+    await database.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
+  } catch (error) {
+    console.error(error);
+  }
+};
