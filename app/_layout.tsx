@@ -1,32 +1,22 @@
 import { AuthProvider } from "@/authProvider/authContext";
-import useAuth from "@/authProvider/useAuth";
-import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect } from "react";
-function RouteGUard({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+import RouteGUard from "@/authProvider/privateRoute";
+import { Stack } from "expo-router";
+import React from "react";
+import { PaperProvider } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-  const { user, loading } = useAuth();
-  const segments = useSegments();
-
-  useEffect(() => {
-    const isAuthGroup = segments[0] === "auth";
-    if (!user && !isAuthGroup && !loading) {
-      router.replace("/auth");
-    } else if (user && isAuthGroup && loading) {
-      router.replace("/");
-    }
-  }, [user, segments, loading]);
-
-  return <>{children}</>;
-}
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RouteGUard>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </RouteGUard>
+      <PaperProvider>
+        <SafeAreaProvider>
+          <RouteGUard>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          </RouteGUard>
+        </SafeAreaProvider>
+      </PaperProvider>
     </AuthProvider>
   );
 }
