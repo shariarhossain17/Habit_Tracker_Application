@@ -1,5 +1,4 @@
 import { Text } from "@react-navigation/elements";
-import { Link } from "expo-router";
 import { View } from "react-native";
 
 export default function Index() {
@@ -11,8 +10,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>hbe</Text>
-      <Link href="/login">Login page</Link>
+      <Text>Hello</Text>
     </View>
   );
 }
