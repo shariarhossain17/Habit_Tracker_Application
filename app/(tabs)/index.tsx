@@ -1,17 +1,19 @@
 import useAuth from "@/authProvider/useAuth";
-import { fetchHabits } from "@/fetchData/fetcData";
+import { fetchHabits, handleDeleteHabit } from "@/fetchData/fetcData";
 import {
   client,
   COLLECTION_ID,
+  COMPLETION_ID,
   database,
   DATABASE_ID,
   RealtimeResponse,
 } from "@/lib/appwrite";
-import { Habit } from "@/types/habitTypes";
+import { Habit, HabitCompletion } from "@/types/habitTypes";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import { ID, Query } from "react-native-appwrite";
 import { Swipeable } from "react-native-gesture-handler";
 import { Button, Surface, Text } from "react-native-paper";
 
@@ -19,12 +21,14 @@ export default function Index() {
   const { signOut, user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
   const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
+  const [completedHabits, setCompletedHabits] = useState<string[]>();
 
   useEffect(() => {
     const loadHabbit = async () => {
       const result = await fetchHabits(user);
       setHabits(result?.documents);
     };
+
     if (user) {
       const habitsChannel = `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`;
       const habitsSubscription = client.subscribe(
@@ -52,21 +56,64 @@ export default function Index() {
         }
       );
 
+      const completionsChannel = `databases.${DATABASE_ID}.collections.${COMPLETION_ID}.documents`;
+      const completionsSubscription = client.subscribe(
+        completionsChannel,
+        (response: RealtimeResponse) => {
+          if (
+            response.events.includes(
+              "databases.*.collections.*.documents.*.create"
+            )
+          ) {
+            fetchTodayCompletions();
+          }
+        }
+      );
+
       loadHabbit();
+      fetchTodayCompletions();
 
       return () => {
         habitsSubscription();
+        completionsSubscription();
       };
     }
   }, [user]);
-
-  const isHabitCompleted = (id: string) => {
-    return false;
+  const fetchTodayCompletions = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const response = await database.listDocuments(
+        DATABASE_ID,
+        COMPLETION_ID,
+        [
+          Query.equal("user_id", user?.$id ?? ""),
+          Query.greaterThanEqual("completed_at", today.toISOString()),
+        ]
+      );
+      const completions = response.documents as HabitCompletion[];
+      setCompletedHabits(completions.map((c) => c.habit_id));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDeleteHabit = async (id: string) => {
+  const handleCompleteHabit = async (id: string) => {
+    if (!user || completedHabits?.includes(id)) return;
     try {
-      await database.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
+      const currentDate = new Date().toISOString();
+      await database.createDocument(DATABASE_ID, COMPLETION_ID, ID.unique(), {
+        habit_id: id,
+
+        user_id: user.$id,
+        completed_at: currentDate,
+      });
+      const habit = habits?.find((h) => h.$id === id);
+      if (!habit) return;
+      await database.updateDocument(DATABASE_ID, COLLECTION_ID, id, {
+        streak_count: habit.streak_count + 1,
+        last_completed: currentDate,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -95,6 +142,8 @@ export default function Index() {
       />
     </View>
   );
+  const isHabitCompleted = (habitId: string) =>
+    completedHabits?.includes(habitId);
 
   return (
     <View style={styles.container}>
