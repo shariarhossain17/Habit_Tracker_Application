@@ -1,5 +1,5 @@
 import { AuthContextType } from "@/types/autcontextType";
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { ID, Models } from "react-native-appwrite";
 import { account } from "../lib/appwrite";
 
@@ -23,6 +23,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return "an error occurred during signup";
     }
   };
+
+  const getUser = async () => {
+    try {
+      const session = await account.get();
+      setUser(session);
+    } catch (error) {
+      setUser(null);
+    }
+  };
   const signIn = async (email: string, password: string) => {
     try {
       await account.createEmailPasswordSession(email, password);
@@ -35,6 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return "an error occurred during sign in";
     }
   };
+
+  useEffect(() => {
+    getUser();
+  }, []);
   const data = {
     user,
     signIn,
