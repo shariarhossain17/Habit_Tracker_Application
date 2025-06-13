@@ -117,7 +117,6 @@ export default function StreaksScreen() {
       return { streak: 0, bestStreak: 0, total: 0 };
     }
 
-    // build streak data
     let streak = 0;
     let bestStreak = 0;
     let total = habitCompletions.length;
@@ -337,9 +336,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: "#e0e0e0",
   },
-  badge1: { backgroundColor: "#ffd700" }, // gold
-  badge2: { backgroundColor: "#c0c0c0" }, // silver
-  badge3: { backgroundColor: "#cd7f32" }, // bronze
+  badge1: { backgroundColor: "#ffd700" },
+  badge2: { backgroundColor: "#c0c0c0" },
+  badge3: { backgroundColor: "#cd7f32" },
 
   rankingBadgeText: {
     fontWeight: "bold",

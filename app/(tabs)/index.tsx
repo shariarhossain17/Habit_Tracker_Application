@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { ID, Query } from "react-native-appwrite";
 import { Swipeable } from "react-native-gesture-handler";
-import { Button, Surface, Text } from "react-native-paper";
+import { Surface, Text } from "react-native-paper";
 
 export default function Index() {
   const { signOut, user } = useAuth();
@@ -79,6 +79,7 @@ export default function Index() {
       };
     }
   }, [user]);
+
   const fetchTodayCompletions = async () => {
     try {
       const today = new Date();
@@ -104,7 +105,6 @@ export default function Index() {
       const currentDate = new Date().toISOString();
       await database.createDocument(DATABASE_ID, COMPLETION_ID, ID.unique(), {
         habit_id: id,
-
         user_id: user.$id,
         completed_at: currentDate,
       });
@@ -122,7 +122,7 @@ export default function Index() {
   const renderRightActions = (habitId: string) => (
     <View style={styles.swipeActionRight}>
       {isHabitCompleted(habitId) ? (
-        <Text style={{ color: "#fff" }}> Completed!</Text>
+        <Text style={{ color: "#fff" }}>Completed!</Text>
       ) : (
         <MaterialCommunityIcons
           name="check-circle-outline"
@@ -142,27 +142,18 @@ export default function Index() {
       />
     </View>
   );
+
   const isHabitCompleted = (habitId: string) =>
     completedHabits?.includes(habitId);
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text variant="headlineSmall" style={styles.title}>
-          {" "}
-          Today's Habits
-        </Text>
-        <Button mode="text" onPress={signOut} icon={"logout"}>
-          Sign Out
-        </Button>
-      </View>
+      <View style={styles.header}></View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {habits?.length === 0 ? (
           <View style={styles.emptyState}>
-            {" "}
             <Text style={styles.emptyStateText}>
-              {" "}
               No Habits yet. Add your first Habit!
             </Text>
           </View>
@@ -195,9 +186,8 @@ export default function Index() {
                 elevation={0}
               >
                 <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}> {habit.title}</Text>
+                  <Text style={styles.cardTitle}>{habit.title}</Text>
                   <Text style={styles.cardDescription}>
-                    {" "}
                     {habit.description}
                   </Text>
                   <View style={styles.cardFooter}>
@@ -213,7 +203,6 @@ export default function Index() {
                     </View>
                     <View style={styles.frequencyBadge}>
                       <Text style={styles.frequencyText}>
-                        {" "}
                         {habit.frequency.charAt(0).toUpperCase() +
                           habit.frequency.slice(1)}
                       </Text>
