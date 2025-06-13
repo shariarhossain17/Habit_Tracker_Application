@@ -5,17 +5,17 @@ import React, { useEffect } from "react";
 function RouteGUard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const segments = useSegments();
 
   useEffect(() => {
     const isAuthGroup = segments[0] === "auth";
-    if (!user && !isAuthGroup) {
+    if (!user && !isAuthGroup && !loading) {
       router.replace("/auth");
-    } else if (user && isAuthGroup) {
+    } else if (user && isAuthGroup && loading) {
       router.replace("/");
     }
-  }, [user, segments]);
+  }, [user, segments, loading]);
 
   return <>{children}</>;
 }
